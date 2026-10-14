@@ -31,7 +31,8 @@
 
 ## 🖥️ 온라인 실행 (GitHub Pages)
 
-- **퀴즈 바로가기**: 배포 완료 후 제공되는 링크를 통해 바로 접속할 수 있습니다.
+- **퀴즈 바로가기**: **[https://hunjisam.github.io/history-quiz/](https://hunjisam.github.io/history-quiz/)**
+  > 교실 전자칠판, 대형 TV, 학생 스마트폰 브라우저에서 위 링크로 바로 접속하여 퀴즈를 진행할 수 있습니다.
 
 ## 💻 로컬 실행 방법
 
