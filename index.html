@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>중3 사회(역사) 퀴즈 - 조선 시대 문화</title>
+    <!-- Pretendard 폰트 (웹폰트 및 시스템 산세리프 폴백) -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --primary: #38bdf8;
+            --primary-hover: #0ea5e9;
+            --accent: #f59e0b;
+            --correct-bg: #064e3b;
+            --correct-border: #10b981;
+            --correct-text: #6ee7b7;
+            --wrong-bg: #7f1d1d;
+            --wrong-border: #ef4444;
+            --wrong-text: #fca5a5;
+            --btn-bg: #334155;
+            --btn-hover: #475569;
+            --btn-text: #ffffff;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 8px;
+            --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* 캔버스 폭죽 효과 */
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* 상단 네비게이션 헤더 */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 12px;
+        }
+
+        .header-title-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-category {
+            background: linear-gradient(135deg, #0284c7, #2563eb);
+            color: #ffffff;
+            font-weight: 800;
+            font-size: clamp(14px, 1.8vw, 18px);
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+        }
+
+        .sound-toggle-btn {
+            background-color: var(--card-bg);
+            border: 2px solid var(--card-border);
+            color: var(--text-main);
+            font-size: clamp(15px, 2vw, 18px);
+            font-weight: 600;
+            padding: 10px 16px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .sound-toggle-btn:hover {
+            border-color: var(--primary);
+            background-color: var(--btn-hover);
+        }
+
+        /* 진행률 바 */
+        .progress-section {
+            background-color: var(--card-bg);
+            padding: 14px 20px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--card-border);
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: clamp(16px, 2.2vw, 20px);
+            margin-bottom: 10px;
+        }
+
+        .progress-q-number {
+            color: var(--primary);
+            font-size: clamp(18px, 2.4vw, 24px);
+        }
+
+        .progress-score {
+            color: var(--accent);
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 14px;
+            background-color: #0b1120;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 10%;
+            background: linear-gradient(90deg, #38bdf8, #10b981);
+            border-radius: 10px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 퀴즈 메인 카드 */
+        .quiz-card {
+            background-color: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: clamp(20px, 4vw, 40px);
+            box-shadow: var(--shadow-card);
+            position: relative;
+        }
+
+        /* 문제 텍스트 */
+        .question-box {
+            margin-bottom: 28px;
+        }
+
+        .question-tag {
+            display: inline-block;
+            color: #38bdf8;
+            font-size: clamp(16px, 2vw, 20px);
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: clamp(22px, 3.2vw, 34px);
+            font-weight: 800;
+            line-height: 1.45;
+            color: #ffffff;
+            word-break: keep-all;
+        }
+
+        /* 선택지 목록 (4지선다) */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .option-btn {
+            background-color: var(--btn-bg);
+            border: 2.5px solid var(--card-border);
+            border-radius: var(--radius-md);
+            color: var(--btn-text);
+            padding: clamp(14px, 2.2vw, 20px) clamp(16px, 2.6vw, 24px);
+            font-size: clamp(18px, 2.4vw, 24px);
+            font-weight: 700;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            transition: all 0.2s ease;
+            min-height: 64px;
+            word-break: keep-all;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: var(--btn-hover);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(56, 189, 248, 0.25);
+        }
+
+        .option-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .option-btn:disabled {
+            cursor: default;
+        }
+
+        .option-content {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .option-num {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: clamp(30px, 3.5vw, 38px);
+            height: clamp(30px, 3.5vw, 38px);
+            background-color: rgba(255, 255, 255, 0.12);
+            border-radius: 50%;
+            font-size: clamp(16px, 2vw, 20px);
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .option-icon {
+            font-size: clamp(20px, 2.6vw, 28px);
+            font-weight: 900;
+            display: none;
+            flex-shrink: 0;
+        }
+
+        /* 정답 / 오답 하이라이트 스타일 */
+        .option-btn.correct {
+            background-color: var(--correct-bg) !important;
+            border-color: var(--correct-border) !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .option-btn.correct .option-num {
+            background-color: var(--correct-border);
+            color: #0f172a;
+        }
+
+        .option-btn.correct .option-icon {
+            display: inline-block;
+            color: var(--correct-border);
+        }
+
+        .option-btn.wrong {
+            background-color: var(--wrong-bg) !important;
+            border-color: var(--wrong-border) !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.35);
+        }
+
+        .option-btn.wrong .option-num {
+            background-color: var(--wrong-border);
+            color: #ffffff;
+        }
+
+        .option-btn.wrong .option-icon {
+            display: inline-block;
+            color: #fca5a5;
+        }
+
+        .option-btn.dimmed {
+            opacity: 0.45;
+        }
+
+        /* 피드백 및 해설 카드 */
+        .feedback-card {
+            background-color: #0b1329;
+            border: 2px solid #3b82f6;
+            border-radius: var(--radius-md);
+            padding: clamp(18px, 3vw, 28px);
+            margin-top: 20px;
+            animation: fadeIn 0.3s ease-out;
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feedback-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .feedback-badge {
+            font-size: clamp(18px, 2.4vw, 24px);
+            font-weight: 800;
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feedback-badge.correct {
+            background-color: var(--correct-border);
+            color: #064e3b;
+        }
+
+        .feedback-badge.wrong {
+            background-color: var(--wrong-border);
+            color: #ffffff;
+        }
+
+        .explanation-text {
+            font-size: clamp(18px, 2.4vw, 24px);
+            font-weight: 600;
+            color: #e2e8f0;
+            line-height: 1.6;
+            margin-bottom: 22px;
+            word-break: keep-all;
+        }
+
+        .action-btn-row {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #0284c7, #2563eb);
+            color: #ffffff;
+            border: none;
+            padding: clamp(14px, 2.2vw, 20px) clamp(28px, 4vw, 44px);
+            font-size: clamp(20px, 2.6vw, 26px);
+            font-weight: 800;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .next-btn:hover {
+            background: linear-gradient(135deg, #0369a1, #1d4ed8);
+            transform: scale(1.03);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+        }
+
+        .next-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 최종 결과 화면 */
+        .result-screen {
+            display: none;
+            text-align: center;
+            padding: clamp(20px, 4vw, 40px) 10px;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .result-title {
+            font-size: clamp(26px, 4vw, 40px);
+            font-weight: 900;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        .score-circle {
+            display: inline-flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: clamp(180px, 26vw, 260px);
+            height: clamp(180px, 26vw, 260px);
+            background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
+            border: 6px solid var(--primary);
+            border-radius: 50%;
+            margin: 20px 0 28px;
+            box-shadow: 0 0 35px rgba(56, 189, 248, 0.4);
+        }
+
+        .score-number {
+            font-size: clamp(54px, 8vw, 84px);
+            font-weight: 900;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .score-unit {
+            font-size: clamp(20px, 3vw, 28px);
+            font-weight: 700;
+            color: var(--text-sub);
+            margin-top: 4px;
+        }
+
+        .result-summary-text {
+            font-size: clamp(22px, 3.2vw, 32px);
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .result-message {
+            font-size: clamp(18px, 2.4vw, 26px);
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 36px;
+            line-height: 1.5;
+            word-break: keep-all;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            border: none;
+            padding: clamp(16px, 2.5vw, 22px) clamp(36px, 5vw, 56px);
+            font-size: clamp(22px, 3vw, 30px);
+            font-weight: 900;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .restart-btn:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: scale(1.04);
+            box-shadow: 0 8px 26px rgba(16, 185, 129, 0.6);
+        }
+
+        .restart-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 접근성 포커스 스타일 */
+        button:focus-visible {
+            outline: 3px solid #38bdf8;
+            outline-offset: 4px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="confettiCanvas"></canvas>
+
+    <div class="container">
+        <!-- 상단 헤더 -->
+        <header>
+            <div class="header-title-box">
+                <span class="badge-category">중3 역사 · 조선 시대 문화</span>
+            </div>
+            <button id="soundToggleBtn" class="sound-toggle-btn" aria-label="효과음 켜기/끄기">
+                <span id="soundIcon">🔊</span>
+                <span id="soundText">소리 켬</span>
+            </button>
+        </header>
+
+        <!-- 진행률 섹션 -->
+        <div id="progressSection" class="progress-section">
+            <div class="progress-labels">
+                <span id="progressQuestionNum" class="progress-q-number">문제 1 / 10</span>
+                <span id="progressScore" class="progress-score">현재 점수: 0점</span>
+            </div>
+            <div class="progress-bar-bg" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100">
+                <div id="progressBarFill" class="progress-bar-fill" style="width: 10%;"></div>
+            </div>
+        </div>
+
+        <!-- 퀴즈 카드 -->
+        <main id="quizCard" class="quiz-card">
+            <!-- 질문 영역 -->
+            <div class="question-box">
+                <div id="questionTag" class="question-tag">Q1.</div>
+                <h1 id="questionText" class="question-text">문제를 불러오는 중입니다...</h1>
+            </div>
+
+            <!-- 선택지 목록 (4지선다) -->
+            <div id="optionsList" class="options-list" role="radiogroup" aria-label="선택지 목록">
+                <!-- 자바스크립트로 동적 생성 -->
+            </div>
+
+            <!-- 즉각 피드백 및 해설 카드 -->
+            <section id="feedbackCard" class="feedback-card" aria-live="polite">
+                <div class="feedback-header">
+                    <span id="feedbackBadge" class="feedback-badge correct">정답입니다! 🎉</span>
+                </div>
+                <p id="explanationText" class="explanation-text"></p>
+                <div class="action-btn-row">
+                    <button id="nextBtn" class="next-btn">다음 문제 ▶</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- 최종 결과 화면 -->
+        <section id="resultScreen" class="quiz-card result-screen" aria-live="polite">
+            <h2 class="result-title">🎉 퀴즈를 모두 완료했습니다!</h2>
+            
+            <div class="score-circle">
+                <span id="finalScoreNum" class="score-number">100</span>
+                <span class="score-unit">/ 100점</span>
+            </div>
+
+            <p id="finalSummaryText" class="result-summary-text">10문제 중 10문제 정답!</p>
+            <p id="finalMessage" class="result-message">완벽해요! 조선 시대 문화 마스터! 👑</p>
+
+            <div>
+                <button id="restartBtn" class="restart-btn">
+                    <span>🔄</span>
+                    <span>다시 풀기</span>
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <!-- 퀴즈 데이터 및 메인 로직 스크립트 -->
+    <script>
+        // 10문항 데이터셋
+        const QUIZ_DATA = [
+            {
+                id: 1,
+                question: "세종대왕이 한자를 몰라 억울한 일을 겪는 백성들을 가엽게 여겨 창제한 우리나라 고유의 문자는 무엇일까요?",
+                options: [
+                    "이두",
+                    "훈민정음",
+                    "향찰",
+                    "구결"
+                ],
+                answerIndex: 1,
+                explanation: "세종대왕은 백성들이 자신의 뜻을 쉽게 표현할 수 있도록 1443년에 훈민정음(한글)을 창제하였습니다."
+            },
+            {
+                id: 2,
+                question: "조선 세종 때 장영실 등이 제작한 것으로, 물이 차오르면 쇠구슬이 굴러 자동으로 종과 북을 쳐서 시간을 알려주던 시계는?",
+                options: [
+                    "앙부일구",
+                    "혼천의",
+                    "자격루",
+                    "일성정시의"
+                ],
+                answerIndex: 2,
+                explanation: "자격루는 물의 흐름을 이용해 정해진 시간마다 자동으로 종과 북을 울리던 조선의 표준 물시계입니다."
+            },
+            {
+                id: 3,
+                question: "조선 시대에 비가 내린 양을 과학적으로 측정하여 농사에 도움을 주기 위해 만든 세계 최초의 우량 측정 기구는?",
+                options: [
+                    "풍기대",
+                    "측우기",
+                    "수표",
+                    "혼상"
+                ],
+                answerIndex: 1,
+                explanation: "측우기는 세종 때 제작된 세계 최초의 강우량 측정기로, 전국 각지의 강수량을 통일된 규격으로 측정했습니다."
+            },
+            {
+                id: 4,
+                question: "태조부터 철종까지 25대 472년간의 역사를 사관들이 날짜순으로 꼼꼼히 기록한 유네스코 세계기록유산은 무엇일까요?",
+                options: [
+                    "조선왕조실록",
+                    "승정원일기",
+                    "삼국사기",
+                    "고려사"
+                ],
+                answerIndex: 0,
+                explanation: "조선왕조실록은 왕이라도 함부로 볼 수 없을 만큼 사관의 독립성과 객관성이 철저히 지켜진 세계적인 기록 문화유산입니다."
+            },
+            {
+                id: 5,
+                question: "조선 시대 선비들의 검소함과 절제미를 잘 나타내며, 유교적 지조와 결백을 상징하여 널리 사랑받은 도자기는?",
+                options: [
+                    "상감청자",
+                    "백자",
+                    "토기",
+                    "옹기"
+                ],
+                answerIndex: 1,
+                explanation: "조선 시대에는 소박하고 순수한 유교 선비 정신을 반영하는 백자가 널리 제작되고 발전하였습니다."
+            },
+            {
+                id: 6,
+                question: "조선 후기 실학자 정약용이 도르래 원리를 활용하여 무거운 돌을 쉽게 들어 올려 수원 화성 축조에 크게 기여한 도구는?",
+                options: [
+                    "거중기",
+                    "녹로",
+                    "유형거",
+                    "신기전"
+                ],
+                answerIndex: 0,
+                explanation: "정약용은 도르래를 이용한 거중기를 고안하여 수원 화성을 쌓는 데 드는 공사 기간과 경비를 크게 줄였습니다."
+            },
+            {
+                id: 7,
+                question: "조선 후기 농업과 상업의 발달로 서민의 경제력이 커지면서 유행한 서민 문화가 아닌 것은 무엇일까요?",
+                options: [
+                    "판소리와 탈춤",
+                    "한글 소설 (춘향전, 홍길동전)",
+                    "민화",
+                    "고려가요와 향가"
+                ],
+                answerIndex: 3,
+                explanation: "향가와 고려가요는 삼국~고려 시대의 문학이며, 조선 후기에는 판소리, 탈춤, 한글 소설, 민화 등 서민 문화가 크게 발달했습니다."
+            },
+            {
+                id: 8,
+                question: "조선 후기 서민들의 일상생활 모습(씨름, 서당, 대장간 등)을 해학적이고 생동감 넘치게 그린 대표적인 풍속 화가는?",
+                options: [
+                    "김홍도",
+                    "안견",
+                    "강희안",
+                    "장승업"
+                ],
+                answerIndex: 0,
+                explanation: "단원 김홍도는 조선 후기 서민들의 다양한 삶과 풍속을 정감 있고 해학적인 필치로 생생하게 그려냈습니다."
+            },
+            {
+                id: 9,
+                question: "중국 산수화 모방에서 벗어나 우리나라의 아름다운 실제 산천을 직접 답사하고 독창적인 화법으로 그린 '진경산수화'의 대표 화가는?",
+                options: [
+                    "정선",
+                    "신사임당",
+                    "이암",
+                    "정약전"
+                ],
+                answerIndex: 0,
+                explanation: "겸재 정선은 『인왕제색도』와 『금강전도』처럼 조선의 실제 자연 경관을 화폭에 담는 진경산수화를 완성했습니다."
+            },
+            {
+                id: 10,
+                question: "허준이 우리나라와 중국의 의학 서적을 종합하고, 우리 땅에서 나는 약재로 백성들을 쉽게 치료할 수 있도록 펴낸 유네스코 세계기록유산 의서는?",
+                options: [
+                    "동의보감",
+                    "향약집성방",
+                    "의방유취",
+                    "마과회통"
+                ],
+                answerIndex: 0,
+                explanation: "『동의보감』은 백성 누구나 쉽게 병을 예방하고 치료할 수 있도록 집대성한 조선 최고의 백과사전식 의학서입니다."
+            }
+        ];
+
+        // Web Audio API 효과음 생성기 (외부 파일 없이 순수 브라우저 합성)
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        this.ctx = new AudioContext();
+                    }
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playCorrect() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 (경쾌한 장3화음 아르페지오)
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    const startTime = this.ctx.currentTime + (idx * 0.08);
+
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, startTime);
+
+                    gain.gain.setValueAtTime(0, startTime);
+                    gain.gain.linearRampToValueAtTime(0.18, startTime + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(startTime);
+                    osc.stop(startTime + 0.36);
+                });
+            }
+
+            playWrong() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                const startTime = this.ctx.currentTime;
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, startTime); // A3
+                osc.frequency.linearRampToValueAtTime(140, startTime + 0.3); // 아래로 떨어지는 음
+
+                gain.gain.setValueAtTime(0.15, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.32);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(startTime);
+                osc.stop(startTime + 0.33);
+            }
+
+            toggle() {
+                this.enabled = !this.enabled;
+                return this.enabled;
+            }
+        }
+
+        // 캔버스 폭죽(콘페티) 효과
+        class ConfettiEffect {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.animationId = null;
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            start() {
+                this.stop();
+                this.particles = [];
+                const colors = ['#38bdf8', '#10b981', '#f59e0b', '#ec4899', '#a855f7', '#ffffff'];
+                for (let i = 0; i < 120; i++) {
+                    this.particles.push({
+                        x: this.canvas.width / 2 + (Math.random() - 0.5) * 200,
+                        y: this.canvas.height / 2 + (Math.random() - 0.5) * 50,
+                        vx: (Math.random() - 0.5) * 16,
+                        vy: (Math.random() * -14) - 6,
+                        size: Math.random() * 8 + 6,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        rotation: Math.random() * 360,
+                        vRot: (Math.random() - 0.5) * 12,
+                        opacity: 1
+                    });
+                }
+                this.animate();
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                let aliveCount = 0;
+
+                this.particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.35; // 중력
+                    p.rotation += p.vRot;
+                    p.opacity -= 0.006;
+
+                    if (p.opacity > 0 && p.y < this.canvas.height + 20) {
+                        aliveCount++;
+                        this.ctx.save();
+                        this.ctx.translate(p.x, p.y);
+                        this.ctx.rotate((p.rotation * Math.PI) / 180);
+                        this.ctx.globalAlpha = Math.max(0, p.opacity);
+                        this.ctx.fillStyle = p.color;
+                        this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 1.5);
+                        this.ctx.restore();
+                    }
+                });
+
+                if (aliveCount > 0) {
+                    this.animationId = requestAnimationFrame(() => this.animate());
+                } else {
+                    this.stop();
+                }
+            }
+
+            stop() {
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+        }
+
+        // 앱 메인 컨트롤러
+        class App {
+            constructor() {
+                this.questions = QUIZ_DATA;
+                this.currentIndex = 0;
+                this.score = 0;
+                this.correctCount = 0;
+                this.answered = false;
+
+                this.sound = new SoundFX();
+                this.confetti = new ConfettiEffect('confettiCanvas');
+
+                this.initElements();
+                this.bindEvents();
+                this.renderQuestion();
+            }
+
+            initElements() {
+                this.soundToggleBtn = document.getElementById('soundToggleBtn');
+                this.soundIcon = document.getElementById('soundIcon');
+                this.soundText = document.getElementById('soundText');
+
+                this.progressSection = document.getElementById('progressSection');
+                this.progressQuestionNum = document.getElementById('progressQuestionNum');
+                this.progressScore = document.getElementById('progressScore');
+                this.progressBarFill = document.getElementById('progressBarFill');
+
+                this.quizCard = document.getElementById('quizCard');
+                this.questionTag = document.getElementById('questionTag');
+                this.questionText = document.getElementById('questionText');
+                this.optionsList = document.getElementById('optionsList');
+
+                this.feedbackCard = document.getElementById('feedbackCard');
+                this.feedbackBadge = document.getElementById('feedbackBadge');
+                this.explanationText = document.getElementById('explanationText');
+                this.nextBtn = document.getElementById('nextBtn');
+
+                this.resultScreen = document.getElementById('resultScreen');
+                this.finalScoreNum = document.getElementById('finalScoreNum');
+                this.finalSummaryText = document.getElementById('finalSummaryText');
+                this.finalMessage = document.getElementById('finalMessage');
+                this.restartBtn = document.getElementById('restartBtn');
+            }
+
+            bindEvents() {
+                this.soundToggleBtn.addEventListener('click', () => {
+                    const isEnabled = this.sound.toggle();
+                    this.soundIcon.textContent = isEnabled ? '🔊' : '🔇';
+                    this.soundText.textContent = isEnabled ? '소리 켬' : '소리 끔';
+                });
+
+                this.nextBtn.addEventListener('click', () => {
+                    this.handleNext();
+                });
+
+                this.restartBtn.addEventListener('click', () => {
+                    this.handleRestart();
+                });
+
+                // 키보드 1, 2, 3, 4 단축키 지원 (교실 TV 및 키보드 편의)
+                window.addEventListener('keydown', (e) => {
+                    if (this.answered) {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            if (this.feedbackCard.style.display !== 'none') {
+                                this.handleNext();
+                            } else if (this.resultScreen.style.display === 'block') {
+                                this.handleRestart();
+                            }
+                        }
+                        return;
+                    }
+
+                    const num = parseInt(e.key, 10);
+                    if (num >= 1 && num <= 4) {
+                        const btns = this.optionsList.querySelectorAll('.option-btn');
+                        if (btns[num - 1]) {
+                            btns[num - 1].click();
+                        }
+                    }
+                });
+            }
+
+            renderQuestion() {
+                const q = this.questions[this.currentIndex];
+                const total = this.questions.length;
+
+                this.answered = false;
+                this.quizCard.style.display = 'block';
+                this.progressSection.style.display = 'block';
+                this.resultScreen.style.display = 'none';
+                this.feedbackCard.style.display = 'none';
+
+                // 상단 진행 상태
+                const currentNum = this.currentIndex + 1;
+                this.progressQuestionNum.textContent = `문제 ${currentNum} / ${total}`;
+                this.progressScore.textContent = `현재 점수: ${this.score}점`;
+                this.progressBarFill.style.width = `${(currentNum / total) * 100}%`;
+
+                // 질문 텍스트
+                this.questionTag.textContent = `Q${currentNum}. [조선 시대 문화]`;
+                this.questionText.textContent = q.question;
+
+                // 4지선다 버튼 렌더링
+                this.optionsList.innerHTML = '';
+                const numIcons = ['①', '②', '③', '④'];
+
+                q.options.forEach((optText, idx) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'option-btn';
+                    btn.setAttribute('role', 'radio');
+                    btn.setAttribute('aria-checked', 'false');
+
+                    btn.innerHTML = `
+                        <div class="option-content">
+                            <span class="option-num">${numIcons[idx]}</span>
+                            <span class="option-text">${optText}</span>
+                        </div>
+                        <span class="option-icon" aria-hidden="true"></span>
+                    `;
+
+                    btn.addEventListener('click', () => {
+                        this.handleSelectOption(idx);
+                    });
+
+                    this.optionsList.appendChild(btn);
+                });
+
+                // 다음 버튼 텍스트 설정
+                if (currentNum === total) {
+                    this.nextBtn.innerHTML = '결과 확인하기 🏆';
+                } else {
+                    this.nextBtn.innerHTML = '다음 문제 ▶';
+                }
+            }
+
+            handleSelectOption(selectedIndex) {
+                if (this.answered) return;
+                this.answered = true;
+
+                const q = this.questions[this.currentIndex];
+                const isCorrect = (selectedIndex === q.answerIndex);
+                const buttons = this.optionsList.querySelectorAll('.option-btn');
+
+                // 사운드 재생
+                if (isCorrect) {
+                    this.sound.playCorrect();
+                    this.score += 10;
+                    this.correctCount += 1;
+                } else {
+                    this.sound.playWrong();
+                }
+
+                // 점수 UI 업데이트
+                this.progressScore.textContent = `현재 점수: ${this.score}점`;
+
+                // 선택지 스타일 반영
+                buttons.forEach((btn, idx) => {
+                    btn.disabled = true;
+                    const iconEl = btn.querySelector('.option-icon');
+
+                    if (idx === q.answerIndex) {
+                        btn.classList.add('correct');
+                        btn.setAttribute('aria-checked', 'true');
+                        iconEl.textContent = '✓ 정답';
+                    } else if (idx === selectedIndex) {
+                        btn.classList.add('wrong');
+                        iconEl.textContent = '✕ 오답';
+                    } else {
+                        btn.classList.add('dimmed');
+                    }
+                });
+
+                // 해설 카드 노출
+                if (isCorrect) {
+                    this.feedbackBadge.className = 'feedback-badge correct';
+                    this.feedbackBadge.textContent = '🎉 정답입니다!';
+                } else {
+                    this.feedbackBadge.className = 'feedback-badge wrong';
+                    this.feedbackBadge.textContent = '💡 아쉽네요! 정답을 확인해보세요.';
+                }
+
+                this.explanationText.textContent = q.explanation;
+                this.feedbackCard.style.display = 'block';
+
+                // 다음 버튼에 자동 포커스 (편리한 엔터키 진행)
+                setTimeout(() => {
+                    this.nextBtn.focus();
+                }, 100);
+            }
+
+            handleNext() {
+                if (this.currentIndex < this.questions.length - 1) {
+                    this.currentIndex += 1;
+                    this.renderQuestion();
+                } else {
+                    this.showResults();
+                }
+            }
+
+            showResults() {
+                this.quizCard.style.display = 'none';
+                this.progressSection.style.display = 'none';
+                this.resultScreen.style.display = 'block';
+
+                this.finalScoreNum.textContent = this.score;
+                this.finalSummaryText.textContent = `10문제 중 ${this.correctCount}문제 정답!`;
+
+                let message = '';
+                if (this.score === 100) {
+                    message = '완벽해요! 조선 시대 문화 마스터! 👑 100점 만점을 축하합니다!';
+                    this.confetti.start();
+                } else if (this.score >= 80) {
+                    message = '훌륭합니다! 교실 최고의 역사 척척박사예요! 🌟';
+                    this.confetti.start();
+                } else if (this.score >= 60) {
+                    message = '잘 풀었어요! 조금만 더 복습하면 만점도 가능해요! 📖';
+                } else {
+                    message = '다시 한 번 풀어볼까요? 틀린 문제를 다시 확인해 보세요! 💪';
+                }
+                this.finalMessage.textContent = message;
+
+                setTimeout(() => {
+                    this.restartBtn.focus();
+                }, 100);
+            }
+
+            handleRestart() {
+                this.confetti.stop();
+                this.currentIndex = 0;
+                this.score = 0;
+                this.correctCount = 0;
+                this.answered = false;
+                this.renderQuestion();
+            }
+        }
+
+        // 페이지 로드 시 앱 시작
+        document.addEventListener('DOMContentLoaded', () => {
+            window.quizApp = new App();
+        });
+    </script>
+</body>
+</html>
